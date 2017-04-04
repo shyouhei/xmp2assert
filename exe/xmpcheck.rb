@@ -32,41 +32,22 @@ require 'xmp2assert'
 class TC_Main < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
-  def self.expandfs argv
-    files = []
-    argv.each do |i|
-      p = Pathname.new i
-      if p.directory? then
-        files += expandfs p.children # recur
-      else
-        files << p
-      end
-    end
+  ARGV.each do |i|
+    p = Pathname.new i
+    f = XMP2Assert::Quasifile.new p
+    k = XMP2Assert::Classifier.classify f
 
-    files.map! do |i|
-      XMP2Assert::Quasifile.new i
-    end
-
-    return files
-  end
-  private_class_method :expandfs
-
-  a = expandfs ARGV
-  p a
-  a.each do |f|
-    klass = XMP2Assert::Classifier.classify f
-
-    if klass.empty? then
+    if k.empty? then
       test f.__FILE__ do
         pend "no tests for #{f.__FILE__}"
       end
     else
       test f.__FILE__ do
         t, o = XMP2Assert::Converter.convert f
-        if klass.include? :'=>' then
+        if k.include? :'=>' then
           t.eval binding
         end
-        if klass.include? :'>>' then
+        if k.include? :'>>' then
           assert_capture2e o, f
         end
       end
