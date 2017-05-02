@@ -35,7 +35,7 @@ module XMP2Assert::PrettierInspect
   #
   # Prettier inspection.
   def inspect
-    str = PP.pp self, '', Float::INFINITY
+    str = PP.singleline_pp self, ''
     str.chomp!
     return str
   end
