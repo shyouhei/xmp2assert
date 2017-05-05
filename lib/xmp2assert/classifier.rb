@@ -42,17 +42,15 @@ require_relative 'quasifile'
 class XMP2Assert::Classifier < Ripper
   private_class_method :new
 
-  # @param qfile [Quasifile] file-ish
-  # @return      [<Symbol>]  either empty, :=>, :>>, or both.
-  # @note                    syntax error results in empty return value.
-  def self.classify qfile
-    case qfile when XMP2Assert::Quasifile then
-      this = new qfile.read, qfile.__FILE__, qfile.__LINE__
-      return this.send :parse
-    else
-      q = XMP2Assert::Quasifile.new qfile
-      return classify q
-    end
+  # @param program  [Quasifile] file-ish
+  # @param filename [String]    qfile's pathname
+  # @param lineno   [Integer]   qfile's line offset
+  # @return         [<Symbol>]  either empty, :=>, :>>, or both.
+  # @note                       syntax error results in empty return value.
+  def self.classify program, filename = nil, lineno = nil
+    qfile = XMP2Assert::Quasifile.new program, filename, lineno
+    this = new qfile.read, qfile.__FILE__, qfile.__LINE__
+    return this.send :parse
   end
 
   private

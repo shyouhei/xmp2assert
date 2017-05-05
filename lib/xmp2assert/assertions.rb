@@ -54,7 +54,8 @@ module XMP2Assert::Assertions
   #   As the method name implies the assertion is against both stdin and stderr
   #   at once.  This is for convenience.
   def assert_capture2e expected, script, message = nil, rubyopts: nil, **opts
-    actual, _ = ruby script, rubyopts: rubyopts, **opts
+    qscript = XMP2Assert::Quasifile.new script
+    actual, _ = ruby qscript, rubyopts: rubyopts, **opts
     actual.force_encoding expected.encoding
     return assert_xmp_raw expected, actual, message
   end
