@@ -22,11 +22,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+;
 
-require_relative 'xmp2assert/namespace' # needs be first
-require_relative 'xmp2assert/version'
-require_relative 'xmp2assert/prettier_inspect'
-require_relative 'xmp2assert/quasifile'
-require_relative 'xmp2assert/converter'
-require_relative 'xmp2assert/classifier'
-require_relative 'xmp2assert/assertions'
+# This is a namespace.  Look at each classes under this module:
+#
+# - {XMP2Assert::Assertions} The assertion framework.
+# - {XMP2Assert::Classifier} Check if the given file actually has the comment.
+# - {XMP2Assert::Converter}  Source code in-place editor using Ripper.
+# - {XMP2Assert::Quasifile}  IO/String abstraction layer
+# - {XMP2Assert::PrettierInspect} Helper module to ease inspection.
+module XMP2Assert; end

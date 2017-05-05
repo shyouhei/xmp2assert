@@ -24,6 +24,8 @@
 # SOFTWARE.
 
 require 'ripper'
+require_relative 'namespace'
+require_relative 'quasifile'
 
 # Usually, you  want to check  LOTS of  files that may  or may not  contain xmp
 # comments at once, maybe  from inside of a CI process.  That's  OK but we want

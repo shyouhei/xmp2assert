@@ -25,6 +25,8 @@
 
 require 'ripper'
 require 'uuid'
+require_relative 'namespace'
+require_relative 'quasifile'
 
 class XMP2Assert::Converter < Ripper
   private_class_method :new

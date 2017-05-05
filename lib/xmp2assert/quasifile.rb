@@ -25,6 +25,8 @@
 
 require 'open-uri'
 require 'pathname'
+require_relative 'namespace'
+require_relative 'prettier_inspect'
 
 # XMP2Assert  converts a  ruby script  into a  test file  but we  want to  hold
 # original path name / line number for diagnostic purposes.  So this class.

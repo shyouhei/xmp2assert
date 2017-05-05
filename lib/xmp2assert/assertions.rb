@@ -30,6 +30,8 @@ require 'erb'
 require 'test/unit'
 require 'test/unit/assertions'
 require 'test/unit/assertion-failed-error'
+require_relative 'namespace'
+require_relative 'quasifile'
 require_relative 'xmp2rexp'
 
 # Helper module that implements assertions.

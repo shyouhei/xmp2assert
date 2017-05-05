@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 require 'pp'
+require_relative 'namespace'
 
 # By  including this  module your  class gets  a {#inspect}  method which  uses
 # {::PP} methods to control outputs.  You  don't have to worry about redefining
