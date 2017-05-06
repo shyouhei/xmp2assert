@@ -29,6 +29,7 @@ require 'test/unit/autorunner'
 require 'pathname'
 require 'xmp2assert'
 
+# This class introduces the test auto-run.
 class TC_Main < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
@@ -44,12 +45,8 @@ class TC_Main < Test::Unit::TestCase
     else
       test f.__FILE__ do
         t, o = XMP2Assert::Converter.convert f
-        if k.include? :'=>' then
-          t.eval binding
-        end
-        if k.include? :'>>' then
-          assert_capture2e o, f
-        end
+        t.eval binding        if k.include? :'=>'
+        assert_capture2e o, f if k.include? :'>>'
       end
     end
   end

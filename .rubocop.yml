@@ -37,10 +37,16 @@ Lint/EmptyWhen:
 Rails:
   Enabled: false
 
+Style/Alias:
+  Enabled: false
+
 Style/AlignHash:
   Enabled: false
 
 Style/AlignParameters:
+  Enabled: false
+
+Style/AndOr:
   Enabled: false
 
 Style/BracesAroundHashParameters:
@@ -50,6 +56,9 @@ Style/CaseEquality:
   Enabled: false
 
 Style/CaseIndentation:
+  Enabled: false
+
+Style/ClassAndModuleCamelCase:
   Enabled: false
 
 Style/ClassAndModuleChildren:
@@ -94,6 +103,9 @@ Style/IndentationWidth:
 Style/MethodDefParentheses:
   Enabled: false
 
+Style/MethodName:
+  Enabled: false
+
 Style/MultilineIfThen:
   Enabled: false
 
@@ -106,10 +118,22 @@ Style/PercentLiteralDelimiters:
 Style/RedundantReturn:
   Enabled: false
 
+Style/RedundantSelf:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/Semicolon:
+  Enabled: false
+
 Style/SpaceAroundOperators:
   Enabled: false
 
 Style/SpaceInsideBrackets:
+  Enabled: false
+
+Style/SpecialGlobalVars:
   Enabled: false
 
 Style/StringLiterals:
@@ -127,11 +151,19 @@ Style/TrailingCommaInLiteral:
 Style/TrailingUnderscoreVariable:
   Enabled: false
 
+Style/VariableInterpolation:
+  Enabled: false
+
 Style/VariableName:
   Enabled: false
 
 Style/WordArray:
   Enabled: false
+
+Lint/UselessAccessModifier:
+  Exclude:
+    # I think detecting this file is a rubocop bug.
+    - 'lib/xmp2assert/validator.rb'
 
 Lint/UselessAssignment:
   Exclude:
@@ -143,24 +175,15 @@ Metrics/AbcSize:
     - 'test/**/*'
     - '*.gemspec'
 
-Metrics/BlockLength:
-  Exclude:
-    - 'test/**/*'
-    - '*.gemspec'
-
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
     - '*.gemspec'
 
-Style/ClassAndModuleCamelCase:
-  Exclude:
-    - 'test/**/*'
-    - '*.gemspec'
-
-Style/Semicolon:
-  Exclude:
-    - 'lib/*/version.rb' # for YARD
+Metrics/BlockLength:
+  ExcludedMethods:
+    - new
+    - sub_test_case
 
 Metrics/LineLength:
   AllowURI: true
