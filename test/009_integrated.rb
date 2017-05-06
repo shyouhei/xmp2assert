@@ -26,30 +26,40 @@
 require_relative 'test_helper'
 require 'xmp2assert'
 
-class TC004_Converter < Test::Unit::TestCase
+class TC009_Integrated < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
-  test ".convert" do
-    qfile = XMP2Assert::Quasifile.new <<-'end;', __FILE__, __LINE__ + 1
-      # @return self
-      def foo
-        x = [1, 2] # => [1,
-                   # =>  2]
-        puts x.first
-        return self
-      end
-      foo # >> 1
-    end;
-    src, out = XMP2Assert::Converter.convert qfile
-    assert_match(/assert_xmp\(\"\[1,/, src.read)
-    assert_equal("1\n", out)
-    src.eval binding
-    assert_capture2e(out, qfile)
-  end
-
-  test "syntax error" do
-    assert_raise SyntaxError do
-      XMP2Assert::Converter.convert "# => 1"
+  data({
+    "immediate" => "1         # => 1",
+    "binop"     => "1 + 1     # => 2",
+    "semicolon" => "3; 2      # => 2",
+    "string"    => '"3; 2"    # => "3; 2"',
+    "dstring"   => '"#{3; 2}" # => "2"',
+    "newline"   => "1\n       # => 1",
+    "array0"    => "[]        # => []",
+    "array1"    => "[1]       # => [1]",
+    "array2"    => "[1, 2]    # => [1, 2]",
+    "array2-nl" => <<-'end',
+      [ 1, # => 1
+        2, # => 2
+      ]    # => [1, 2]
     end
+    "heredoc1"  => <<-'end'.gsub(/^\s+/, ''),
+      <<EOS # => "1\n"
+      1
+      EOS
+    end
+    "heredoc2"  => <<-'end'.gsub(/^\s+/, ''),
+      <<EOS
+      1
+      EOS
+      # => "1\n"
+    end
+  })
+
+  test "assert" do |expr|
+    src, out = XMP2Assert::Converter.convert expr
+    src.eval binding
+    assert_capture2e(out, q) unless out.empty?
   end
 end

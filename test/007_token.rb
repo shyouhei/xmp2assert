@@ -26,30 +26,48 @@
 require_relative 'test_helper'
 require 'xmp2assert'
 
-class TC004_Converter < Test::Unit::TestCase
-  include XMP2Assert::Assertions
-
-  test ".convert" do
-    qfile = XMP2Assert::Quasifile.new <<-'end;', __FILE__, __LINE__ + 1
-      # @return self
-      def foo
-        x = [1, 2] # => [1,
-                   # =>  2]
-        puts x.first
-        return self
-      end
-      foo # >> 1
-    end;
-    src, out = XMP2Assert::Converter.convert qfile
-    assert_match(/assert_xmp\(\"\[1,/, src.read)
-    assert_equal("1\n", out)
-    src.eval binding
-    assert_capture2e(out, qfile)
+class TestToken < Test::Unit::TestCase
+  test "#compare" do
+    x = XMP2Assert::Token.new nil, nil, 1
+    y = XMP2Assert::Token.new nil, nil, 2
+    assert_equal(true, x < y)
   end
 
-  test "syntax error" do
-    assert_raise SyntaxError do
-      XMP2Assert::Converter.convert "# => 1"
+  test "#raise" do
+    x = XMP2Assert::Token.new nil, nil, ["x", 1, 2]
+    assert_raise(SyntaxError) { x.raise }
+    # how do we test backtrace?
+  end
+
+  test "#to_sym" do
+    x = XMP2Assert::Token.new :x, nil, [nil, nil, nil]
+    assert_equal(:x, x.to_sym)
+  end
+
+  test "#to_s" do
+    x = XMP2Assert::Token.new nil, "x", [nil, nil, nil]
+    assert_equal("x", x.to_s)
+  end
+
+  test "#__FILE__" do
+    x = XMP2Assert::Token.new nil, nil, ["x", nil, nil]
+    assert_equal("x", x.__FILE__)
+  end
+
+  test "#__LINE__" do
+    x = XMP2Assert::Token.new nil, nil, [nil, 1, nil]
+    assert_equal(1, x.__LINE__)
+  end
+
+  test "#__COLUMN__" do
+    x = XMP2Assert::Token.new nil, nil, [nil, nil, 1]
+    assert_equal(1, x.__COLUMN__)
+  end
+
+  unless $DEBUG
+    test "#inspect" do
+      x = XMP2Assert::Token.new :foo, "bar", [nil, nil, nil]
+      assert_equal('(:foo "bar")', x.inspect)
     end
   end
 end

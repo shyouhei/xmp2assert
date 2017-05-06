@@ -23,33 +23,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'test_helper'
-require 'xmp2assert'
+require 'ripper'
+require_relative 'namespace'
+require_relative 'quasifile'
 
-class TC004_Converter < Test::Unit::TestCase
-  include XMP2Assert::Assertions
+# This is a tiny ripper extension that checks one thing; if a given string is a
+# valid ruby program or not.
+#
+# ```ruby
+# Pathname.glob('**/*.rb').select do |f|
+#   XMP2Assert::Validator.valid?(f)
+# end
+# ```
+class XMP2Assert::Validator < Ripper
+  private_class_method :new
 
-  test ".convert" do
-    qfile = XMP2Assert::Quasifile.new <<-'end;', __FILE__, __LINE__ + 1
-      # @return self
-      def foo
-        x = [1, 2] # => [1,
-                   # =>  2]
-        puts x.first
-        return self
-      end
-      foo # >> 1
-    end;
-    src, out = XMP2Assert::Converter.convert qfile
-    assert_match(/assert_xmp\(\"\[1,/, src.read)
-    assert_equal("1\n", out)
-    src.eval binding
-    assert_capture2e(out, qfile)
+  # @param program  [Quasifile]  a ruby program candidate.
+  # @param filename [String]     program's path.
+  # @param lineno   [Integer]    program's line number.
+  # @return         [TrueClass]  the given program is a valid ruby program.
+  # @return         [FalseClass] it isn't.
+  def self.valid? program, filename = nil, lineno = nil
+    qfile = XMP2Assert::Quasifile.new program, filename, lineno
+    this = new qfile.read, qfile.__FILE__, qfile.__LINE__
+    this.parse
+  rescue
+    return false
+  else
+    return true
   end
 
-  test "syntax error" do
-    assert_raise SyntaxError do
-      XMP2Assert::Converter.convert "# => 1"
-    end
-  end
+  private
+
+  alias on_parse_error raise
+  alias compile_error raise
 end

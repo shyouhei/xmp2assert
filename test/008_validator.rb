@@ -24,32 +24,32 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/validator'
 
-class TC004_Converter < Test::Unit::TestCase
-  include XMP2Assert::Assertions
-
-  test ".convert" do
-    qfile = XMP2Assert::Quasifile.new <<-'end;', __FILE__, __LINE__ + 1
-      # @return self
-      def foo
-        x = [1, 2] # => [1,
-                   # =>  2]
-        puts x.first
-        return self
-      end
-      foo # >> 1
-    end;
-    src, out = XMP2Assert::Converter.convert qfile
-    assert_match(/assert_xmp\(\"\[1,/, src.read)
-    assert_equal("1\n", out)
-    src.eval binding
-    assert_capture2e(out, qfile)
-  end
-
-  test "syntax error" do
-    assert_raise SyntaxError do
-      XMP2Assert::Converter.convert "# => 1"
+class TestValidaror < Test::Unit::TestCase
+  data({
+    "1"              => ["1", true],
+    "lines"          => ["1;1", true],
+    "paren0"         => ["func(1)", true],
+    "paren1"         => ["func(1", false],
+    "paren2"         => ["1)", false],
+    "mixed"          => ["[(])", false],
+    "do}"            => ["1.times do }", false],
+    "{end"           => ["1.times { end", false],
+    "if"             => ["if true", false],
+    "if then"        => ["if true then", false],
+    "if then end"    => ["if true then 1 end", true],
+    "heredoc"        => ["<<END\n1\nEND", true],
+    "heredoc nested" => [<<-'end', true],
+      <<-'END'
+        #{<<-"__END__"}
+          1
+        __END__
+      END
     end
+  })
+
+  test ".valid?" do |(expr, expected)|
+    assert_equal(expected, XMP2Assert::Validator.valid?(expr))
   end
 end
