@@ -26,7 +26,7 @@
 require_relative 'test_helper'
 require 'xmp2assert/validator'
 
-class TestValidaror < Test::Unit::TestCase
+class TC008_Validator < Test::Unit::TestCase
   data({
     "1"              => ["1", true],
     "lines"          => ["1;1", true],

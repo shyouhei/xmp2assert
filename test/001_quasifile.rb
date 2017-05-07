@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
+require 'xmp2assert/quasifile'
 require 'stringio'
 require 'tempfile'
 require 'pathname'

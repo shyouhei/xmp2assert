@@ -24,7 +24,7 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/prettier_inspect'
 
 class TestTarget
   include ::XMP2Assert::PrettierInspect

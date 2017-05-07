@@ -24,9 +24,9 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/converter'
 
-class TC004_Converter < Test::Unit::TestCase
+class TC006_Converter < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
   test ".convert" do

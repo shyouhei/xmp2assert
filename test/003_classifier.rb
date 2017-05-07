@@ -24,7 +24,7 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/classifier'
 
 class TC003_Classifier < Test::Unit::TestCase
   data({

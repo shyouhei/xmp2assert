@@ -24,9 +24,9 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/token'
 
-class TestToken < Test::Unit::TestCase
+class TC007_token < Test::Unit::TestCase
   test "#compare" do
     x = XMP2Assert::Token.new nil, nil, 1
     y = XMP2Assert::Token.new nil, nil, 2

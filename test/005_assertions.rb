@@ -24,9 +24,9 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'xmp2assert/assertions'
 
-class TC004_Assertions < Test::Unit::TestCase
+class TC005_Assertions < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
   sub_test_case "#assert_xmp" do
