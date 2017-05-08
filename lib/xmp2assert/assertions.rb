@@ -77,20 +77,20 @@ module XMP2Assert::Assertions
 
   # :TODO: is it private?
   def assert_xmp_raw xmp, actual, message = nil
-    msg      = genmsg xmp, actual, message
     expected = xmp2rexp xmp
 
     raise unless expected.match actual
   rescue
     # Regexp#match can raise. That should also be a failure.
-    ix = Test::Unit::Assertions::AssertionMessage.convert xmp
-    ia = Test::Unit::Assertions::AssertionMessage.convert actual
-    ex = Test::Unit::AssertionFailedError.new(msg,
-                  expected: xmp,
-                    actual: actual,
-        inspected_expected: ix,
-          inspected_actual: ia,
-              user_message: message)
+    msg = genmsg xmp, actual, message
+    ix  = Test::Unit::Assertions::AssertionMessage.convert xmp
+    ia  = Test::Unit::Assertions::AssertionMessage.convert actual
+    ex  = Test::Unit::AssertionFailedError.new(msg,
+                    expected: xmp,
+                      actual: actual,
+          inspected_expected: ix,
+            inspected_actual: ia,
+                user_message: message)
     raise ex
   else
     return self # or...?
@@ -105,7 +105,7 @@ module XMP2Assert::Assertions
 
   def genmsg x, y, z = nil
     diff = Test::Unit::Assertions::AssertionMessage.delayed_diff x, y
-    if try(x, :ascii_ony?) and try(y, :ascii_only?) then
+    if try(x, :ascii_only?) && try(y, :ascii_only?) then
       fmt  = "<?> expected but was\n<?>.?"
       argv = [x, y, diff]
     elsif try(x, :encoding) != try(y, :encoding) then

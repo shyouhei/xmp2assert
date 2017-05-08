@@ -33,8 +33,6 @@ require_relative 'prettier_inspect'
 class XMP2Assert::Quasifile
   include XMP2Assert::PrettierInspect
 
-  # @return [Quasifile] a new quasifile.
-  #
   # @overload new(qfile)
   #   Just return the given object (for possible recursive calls).
   #
@@ -86,6 +84,10 @@ class XMP2Assert::Quasifile
   #   @param  line  [Integer]   line offset.
   #   @return       [Quasifile] generated qiasifile.
   #
+  # @return [Quasifile] a new quasifile.
+  # @param obj  [Quasifile, URI, Pathname, String, File, IO] a file-ish.
+  # @param file [String] path of the file (optional).
+  # @param line [Integer] line offset (optional).
   def self.new(obj, file = nil, line = nil)
     case
     when src  = switch { obj.to_str  } then # LIKELY

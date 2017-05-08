@@ -91,6 +91,9 @@ Style/ExtraSpacing:
 Style/FormatString:
   Enabled: false
 
+Style/GuardClause:
+  Enabled: false
+
 Style/IndentHash:
   Enabled: false
 
@@ -109,10 +112,16 @@ Style/MethodName:
 Style/MultilineIfThen:
   Enabled: false
 
+Style/MultilineMethodCallIndentation:
+  Enabled: false
+
 Style/ParallelAssignment:
   Enabled: false
 
 Style/PercentLiteralDelimiters:
+  Enabled: false
+
+Style/PerlBackrefs:
   Enabled: false
 
 Style/RedundantReturn:
@@ -160,6 +169,12 @@ Style/VariableName:
 Style/WordArray:
   Enabled: false
 
+Style/WhileUntilDo:
+  Enabled: false
+
+Style/WhileUntilModifier:
+  Enabled: false
+
 Lint/UselessAccessModifier:
   Exclude:
     # I think detecting this file is a rubocop bug.
@@ -193,3 +208,14 @@ Metrics/MethodLength:
   CountComments: false
   Enabled: true
   Max: 30
+
+Style/EmptyElse:
+  Enabled: true
+  EnforcedStyle: empty
+
+Style/SpaceInsideBlockBraces:
+  Enabled: true
+  EnforcedStyle: space
+  SpaceBeforeBlockParameters: false
+  Exclude:
+    - '*.gemspec'

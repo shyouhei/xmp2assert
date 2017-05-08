@@ -25,7 +25,7 @@
 
 require 'ripper'
 require_relative 'namespace'
-require_relative 'quasifile'
+require_relative 'parser'
 
 # Usually, you  want to check  LOTS of  files that may  or may not  contain xmp
 # comments at once, maybe  from inside of a CI process.  That's  OK but we want
@@ -39,33 +39,21 @@ require_relative 'quasifile'
 #   XMP2Assert::Classifier.classify(f)
 # end
 # ```
-class XMP2Assert::Classifier < Ripper
-  private_class_method :new
-
-  # @param program  [Quasifile] file-ish
-  # @param filename [String]    qfile's pathname
-  # @param lineno   [Integer]   qfile's line offset
-  # @return         [<Symbol>]  either empty, :=>, :>>, or both.
-  # @note                       syntax error results in empty return value.
-  def self.classify program, filename = nil, lineno = nil
-    qfile = XMP2Assert::Quasifile.new program, filename, lineno
-    this = new qfile.read, qfile.__FILE__, qfile.__LINE__
-    return this.send :parse
-  end
-
-  private
-
-  def parse
-    @ret = []
-    super
-    return @ret
-  end
-
-  def on_comment tok
-    case tok
-    when /^# =>/ then @ret |= [:'=>']
-    when /^# >>/ then @ret |= [:'>>']
-    when /^# ~>/ then @ret |= [:'>>']
-    end
+module XMP2Assert::Classifier
+  # @param  (see XMP2Assert::Parser.new)
+  # @return [<Symbol>]  either empty, :=>, :>>, or both.
+  # @note               syntax error results in empty return value.
+  def self.classify obj, file = nil, line = nil
+    parser = XMP2Assert::Parser.new obj, file, line
+  rescue SyntaxError
+    return []
+  else
+    return parser                                              \
+      .tokens                                                  \
+      .map(&:to_sym)                                           \
+      .sort                                                    \
+      .uniq                                                    \
+      .map {|i| case i when :'=>', :'>>' then i else nil end } \
+      .compact
   end
 end
