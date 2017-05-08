@@ -30,10 +30,12 @@ class TC009_Integrated < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
   data({
-    "immediate" => "1     # => 1",
-    "binop"     => "1 + 1 # => 2",
-    "semicolon" => "3; 2  # => 2",
-    "newline"   => "1\n   # => 1",
+    "immediate"  => "1         # => 1",
+    "binop"      => "1 + 1     # => 2",
+    "semicolon1" => "3; 2      # => 2",
+    "semicolon2" => "3; 2;     # => 2",
+    "newline"    => "1\n       # => 1",
+    "comment"    => "1 # foo\n # => 1",
 
     "array0"     => "[]     # => []",
     "array1"     => "[1]    # => [1]",
@@ -95,11 +97,27 @@ class TC009_Integrated < Test::Unit::TestCase
     "if-end"     => "if true then 1 else 2 end # => 1",
     "if-mod"     => "1 if true                 # => 1",
     "ternary op" => "true ? 1 : 2              # => 1",
+    "if-nl"      =>  <<-'end',
+      if false then 2 # => 2
+      else 1 # => 1
+      end # => 1
+    end
+    "if-nl1"     =>  <<-'end',
+      if false then # => false
+        2 # => 2
+      else
+        1 # => 1
+      end # => 1
+    end
 
     "method"   => "def foo\n  1\nend\n foo # => 1",
     "block"    => "1.tap {|i| i + 1 }      # => 1",
     "block-nl" => "1.tap {|i|\n i + 1\n}   # => 1",
     "block-do" => "1.tap do |i|  i + 1 end # => 1",
+
+    "&&" => <<-'end',
+      "a" < "z" && "A" < "z" # => true
+    end
   })
 
   test "assert" do |expr|

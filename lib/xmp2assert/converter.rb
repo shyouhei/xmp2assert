@@ -142,12 +142,49 @@ class XMP2Assert::Converter
 
   def need_paren? list
     start = list.first.to_sym.to_s
-    stop  = list.last .to_sym.to_s
 
     if %r/(.+)_beg$/ =~ start then
-      return %r/#{$1}_end$/ !~ stop
+      t = $1
+      list.inject 0 do |i, tok|
+        tt = tok.to_sym.to_s
+        if %r/#{t}_beg$/ =~ tt
+          next i + 1
+        elsif %r/#{t}_end$/ =~ tt
+          j = i - 1
+          if j > 0 then
+            next j
+          elsif tok == list.last
+            return false
+          else
+            return true
+          end
+        else
+          next i
+        end
+      end
+      return true
+
     elsif %r/^l(paren|brace|bracket)$/ =~ start then
-      return %r/^r#{$1}$/ !~ stop
+      t = $1
+      list.inject 0 do |i, tok|
+        tt = tok.to_sym.to_s
+        if %r/^l#{t}$/ =~ tt
+          next i + 1
+        elsif %r/^r#{t}$/ =~ tt
+          j = i - 1
+          if j > 0 then
+            next j
+          elsif tok == list.last
+            return false
+          else
+            return true
+          end
+        else
+          next i
+        end
+      end
+      return true
+
     else
       return true
     end
