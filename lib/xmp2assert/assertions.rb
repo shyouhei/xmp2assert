@@ -105,7 +105,10 @@ module XMP2Assert::Assertions
 
   def genmsg x, y, z = nil
     diff = Test::Unit::Assertions::AssertionMessage.delayed_diff x, y
-    if try(x, :encoding) != try(y, :encoding) then
+    if try(x, :ascii_ony?) and try(y, :ascii_only?) then
+      fmt  = "<?> expected but was\n<?>.?"
+      argv = [x, y, diff]
+    elsif try(x, :encoding) != try(y, :encoding) then
       fmt  = "<?>(?) expected but was\n<?>(?).?"
       argv = [x, x.encoding.name, y, y.encoding.name, diff]
     else
