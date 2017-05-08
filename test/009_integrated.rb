@@ -121,6 +121,19 @@ class TC009_Integrated < Test::Unit::TestCase
 
     "capture"    => "STDOUT.puts  'foo' # >> foo",
     "capture-nl" => "STDOUT.write 'foo' # >> foo\n",
+
+    "return" => <<-'end,',
+      def foo
+        return 1 # => 1
+      end
+      foo # => 1
+    end,
+    "next" => <<-'end',
+      [1,                  # => 1
+      ].inject(0) {|i, j|
+        next i + j         # => 1
+      }                    # => 1
+    end
   })
 
   test "assert" do |expr|

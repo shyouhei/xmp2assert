@@ -108,6 +108,20 @@ class XMP2Assert::Converter
     end
   end
 
+  def beginning_of_expr? tok
+    case tok.to_sym
+    when :sp          then return false
+    when :kw          then
+      case tok.to_s
+      when 'return'   then return false
+      when 'next'     then return false
+      when 'break'    then return false
+      else                 return true
+      end
+    else                   return true
+    end
+  end
+
   def find_stop xmp
     pos = @tokens.index xmp
     (pos - 1).downto 0 do |i|
@@ -133,7 +147,7 @@ class XMP2Assert::Converter
     line = @program.same_line_as stop
     line.sort!
     line.select! {|i| i.__COLUMN__ <= stop.__COLUMN__ }
-    line = line.drop_while {|i| i.to_sym == :sp }
+    line = line.drop_while {|i| not beginning_of_expr? i }
     until valid? line do
       line.shift
     end
