@@ -86,5 +86,10 @@ class TC005_Assertions < Test::Unit::TestCase
       q = XMP2Assert::Quasifile.new 'puts ARGF.read'
       assert_capture2e "foo\n", q, stdin_data: 'foo'
     end
+
+    test "no trailing newline" do
+      qfile = XMP2Assert::Quasifile.new 'STDOUT.write "foo"'
+      assert_capture2e "foo", qfile
+    end
   end
 end

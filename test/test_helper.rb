@@ -30,3 +30,22 @@ SimpleCov.start do
   add_filter 'test/'
   add_filter 'vendor/'
 end
+
+# yields block silence
+def suppress
+  v, $-w = $-w, nil
+  o = STDOUT.dup
+  e = STDERR.dup
+  open IO::NULL, 'wb:binary:binary' do |f|
+    begin
+      STDOUT.reopen f
+      STDERR.reopen f
+      yield
+    ensure
+      STDOUT.reopen o
+      STDERR.reopen e
+    end
+  end
+ensure
+  $-w = v
+end

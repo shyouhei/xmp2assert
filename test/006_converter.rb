@@ -43,7 +43,9 @@ class TC006_Converter < Test::Unit::TestCase
     src, out = XMP2Assert::Converter.convert qfile
     assert_match(/assert_xmp\(\"\[1,/, src.read)
     assert_equal("1\n", out)
-    src.eval binding
+    suppress do
+      src.eval binding
+    end
     assert_capture2e(out, qfile)
   end
 

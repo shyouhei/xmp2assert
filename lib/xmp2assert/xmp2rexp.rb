@@ -48,11 +48,11 @@ module XMP2Assert::XMP2Rexp
     # :NOTE: we are  editing regular expressions using  regular expressions. In
     # order  to hack  this method  you must  be a  seasoned regular  expression
     # craftsperson who can count backslashes at ease.
-    src = Regexp.escape xmp
+    src = Regexp.escape xmp.chomp
     src.gsub!(/([^\\])(\\n|\\ )+/, '\\1\s+')
     src.gsub!(/(#<[\w:]+?:)0x[0-9a-f]+/, '\\10x[0-9a-f]+')
     src.gsub!(/\\\.rb:\d+/, '\\.rb:\d+')
 
-    return Regexp.new "\\A#{src}\\z"
+    return Regexp.new "\\A#{src}\\n?\\z"
   end
 end

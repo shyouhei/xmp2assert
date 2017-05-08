@@ -118,14 +118,23 @@ class TC009_Integrated < Test::Unit::TestCase
     "&&" => <<-'end',
       "a" < "z" && "A" < "z" # => true
     end
+
+    "capture"    => "STDOUT.puts  'foo' # >> foo",
+    "capture-nl" => "STDOUT.write 'foo' # >> foo\n",
   })
 
   test "assert" do |expr|
     begin
       v, $-w = $-w, nil
       src, out = XMP2Assert::Converter.convert expr
-      src.eval binding
-      assert_capture2e(out, q) unless out.empty?
+      if out.empty?
+        src.eval binding
+      else
+        suppress do
+          src.eval binding
+        end
+        assert_capture2e(out, src)
+      end
     ensure
       $-w = v
     end

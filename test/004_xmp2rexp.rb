@@ -30,15 +30,15 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
   include XMP2Assert::XMP2Rexp
 
   data({
-    "class"   => ['TrueClass', /\ATrueClass\z/],
-    "integer" => ['1', /\A1\z/],
-    "numeric" => ['1.0', /\A1\.0\z/],
-    "object"  => ['#<Object:0x007f896c9b49c8>', /\A\#<Object:0x[0-9a-f]+>\z/],
-    "array"   => ['[1]', /\A\[1\]\z/],
-    "hash"    => ['{1=>2}', /\A\{1=>2\}\z/],
-    "string"  => ['"foo.bar"', /\A"foo\.bar"\z/],
-    "dstr"    => ['"foo#{bar}"', /\A"foo\#\{bar\}"\z/],
-    "complex" => [ <<'EOF1', /\A#{<<'EOF2'.gsub(/(\n|\s)+/, '\s+')}\z/],
+    "class"   => ['TrueClass', /\ATrueClass\n?\z/],
+    "integer" => ['1', /\A1\n?\z/],
+    "numeric" => ['1.0', /\A1\.0\n?\z/],
+    "object"  => ['#<Object:0x007f896c9b49c>', /\A\#<Object:0x[0-9a-f]+>\n?\z/],
+    "array"   => ['[1]', /\A\[1\]\n?\z/],
+    "hash"    => ['{1=>2}', /\A\{1=>2\}\n?\z/],
+    "string"  => ['"foo.bar"', /\A"foo\.bar"\n?\z/],
+    "dstr"    => ['"foo#{bar}"', /\A"foo\#\{bar\}"\n?\z/],
+    "complex" => [ <<'EOF', /\A#{<<'EOF'.chomp.gsub(/(\n|\s)+/, '\s+')}\n?\z/],
 #<PP:0x007fe02908fe88
  @buffer=[],
  @buffer_width=0,
@@ -61,7 +61,7 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
  @newline="\n",
  @output="",
  @output_width=0>
-EOF1
+EOF
 \#<PP:0x[0-9a-f]+
  @buffer=\[\],
  @buffer_width=0,
@@ -84,7 +84,7 @@ EOF1
  @newline="\\n",
  @output="",
  @output_width=0>
-EOF2
+EOF
   })
 
   test "escape" do |(expr, expected)|
