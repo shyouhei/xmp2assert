@@ -88,6 +88,13 @@ class TC009_Integrated < Test::Unit::TestCase
       EOS
       # => "    1\n\n"
     end
+    "heredoc_fluent" => <<-'end'.gsub(/^      /, ''),
+      <<"EOS".lines.size # => 2
+        #{2; <<-"EOS"}
+          1
+        EOS
+      EOS
+    end
 
     "assign"  => "x    = 1       # => 1",
     "massign" => "x, y = 1, 2    # => [1, 2]",

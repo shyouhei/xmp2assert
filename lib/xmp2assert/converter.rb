@@ -143,14 +143,37 @@ class XMP2Assert::Converter
     return true
   end
 
+  def tmp_reroute_heredoc line
+    return line.map do |tok|
+      case tok.to_sym when :heredoc_beg then
+        next XMP2Assert::Token.new :'""', '""', tok.yylloc
+      else
+        next tok
+      end
+    end
+  end
+
+  def revert_heredoc before, after
+    after.map! do |tok|
+      case tok.to_sym when :'""' then
+        next before.find {|i| i.yylloc == tok.yylloc }
+      else
+        next tok
+      end
+    end
+    before.replace after
+  end
+
   def find_start stop
     line = @program.same_line_as stop
     line.sort!
     line.select! {|i| i.__COLUMN__ <= stop.__COLUMN__ }
     line = line.drop_while {|i| not beginning_of_expr? i }
-    until valid? line do
-      line.shift
+    line2 = tmp_reroute_heredoc line
+    until valid? line2 do
+      line2.shift
     end
+    revert_heredoc line, line2
     return line
   end
 
