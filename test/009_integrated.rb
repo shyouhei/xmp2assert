@@ -141,6 +141,40 @@ class TC009_Integrated < Test::Unit::TestCase
         next i + j         # => 1
       }                    # => 1
     end
+
+    "multiline0" => <<-'end',
+      [ 1, 2, 3, ]
+      # => [1,
+      # =>  2,
+      # =>  3]
+    end
+    "multiline1" => <<-'end',
+      [ 1, 2, 3, ]
+      # => [1,
+      #     2,
+      #     3]
+    end
+    "multiline2" => <<-'end',
+      [ 1, 2, 3, ] # => [1,
+      #                  2,
+      #                  3]
+    end
+    "multiline3" => <<-'end',
+      [ 1, 2, 3, ] # =>
+      # [1, 2, 3]
+    end
+    "multiline4" => <<-'end',
+      puts 1,2,3
+      # >> 1
+      # >> 2
+      # >> 3
+    end
+    "multiline5" => <<-'end',
+      puts 1,2,3
+      # >> 1
+      #    2
+      #    3
+    end
   })
 
   test "assert" do |expr|

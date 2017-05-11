@@ -64,8 +64,8 @@ class XMP2Assert::Converter
 
   def convert
     @tokens = @program.tokens
+    understand
     outputs = aggregate
-    merge_xmp
     render
     ret = XMP2Assert::Quasifile.new @tokens.join, *@program.locations
     return ret, outputs
@@ -269,38 +269,43 @@ class XMP2Assert::Converter
     end
   end
 
-  def aggregate
-    return @tokens.each_with_object String.new do |tok, r|
-      next unless tok.to_sym == :>>
-      str = tok.to_s
-      r << str
-      str.replace "\n"
-    end
-  end
-
-  def merge_xmp
+  def understand
     xmp = nil
     @tokens.each do |tok|
-      case tok.to_sym
-      when :sp then next
-      when :'=>' then
-        str = tok.to_s
-        if xmp then
-          xmp << str
-          str.replace "\n"
-          tok.yylex = :nl
+      case sym = tok.to_sym
+      when :'=>', :>> then
+        if xmp and xmp.to_sym == sym then
+          xmp.to_s.concat tok.to_s
+          tok.yylex  = :nl
+          tok.yylval = "\n"
         else
-          xmp = str
+          xmp = tok
         end
+      when :comment then
+        if xmp then
+          xmp.to_s.concat tok.to_s.sub(/^#/, '')
+          tok.yylex  = :nl
+          tok.yylval = "\n"
+        else
+          xmp = nil
+        end
+      when :sp then
+        next # ignore spaces
       else
         xmp = nil
       end
     end
   end
 
+  def aggregate
+    return @tokens                               \
+      .select {|i| i.to_sym == :>> }             \
+      .map {|i| i.to_s.tap { i.yylval = "\n" } } \
+      .join
+  end
+
   def render
-    @tokens.each do |tok|
-      next unless tok.to_sym == :'=>'
+    @tokens.select {|i| i.to_sym == :'=>' }.each do |tok|
       xmp = tok.to_s
       tap = gen_tap xmp
       xmp.replace "\n"

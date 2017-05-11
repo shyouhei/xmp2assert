@@ -33,7 +33,7 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
     "class"   => ['TrueClass', /\ATrueClass\n?\z/],
     "integer" => ['1', /\A1\n?\z/],
     "numeric" => ['1.0', /\A1\.0\n?\z/],
-    "object"  => ['#<Object:0x007f896c9b49c>', /\A\#<Object:0x[0-9a-f]+>\n?\z/],
+    "object"  => ['#<Object:0x007f896c9b49>', /\A\#<Object:0x[0-9a-f]+>\n?\z/],
     "array"   => ['[1]', /\A\[1\]\n?\z/],
     "hash"    => ['{1=>2}', /\A\{1=>2\}\n?\z/],
     "string"  => ['"foo.bar"', /\A"foo\.bar"\n?\z/],

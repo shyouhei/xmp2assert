@@ -115,6 +115,9 @@ Style/MultilineIfThen:
 Style/MultilineMethodCallIndentation:
   Enabled: false
 
+Style/Not:
+  Enabled: false
+
 Style/ParallelAssignment:
   Enabled: false
 
