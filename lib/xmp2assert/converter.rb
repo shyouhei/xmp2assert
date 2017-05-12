@@ -23,7 +23,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'ripper'
 require 'uuid'
 require_relative 'namespace'
 require_relative 'parser'
@@ -48,8 +47,7 @@ class XMP2Assert::Converter
   # ```
   #
   # @param  (see #initialize)
-  # @return [(Quasifile,String)] tuple  of  generated  file  and  its  expected
-  #                              output.
+  # @return (see #convert)
   def self.convert obj, file = nil, line = nil
     this = new obj, file, line
     return this.send :convert
@@ -62,13 +60,16 @@ class XMP2Assert::Converter
     @program = XMP2Assert::Parser.new obj, file, line
   end
 
+  # @return [(Quasifile,String,String,String)]
+  #   a  tuple  of  comment-converted  source, its  expected  stdout,  expected
+  #   stderr, and expected exception.
   def convert
     @tokens = @program.tokens
     understand
-    outputs = aggregate
+    stdout, stderr, exceptions = aggregate
     render
     ret = XMP2Assert::Quasifile.new @tokens.join, *@program.locations
-    return ret, outputs
+    return ret, stdout, stderr, exceptions
   end
 
   def gensym expr
@@ -81,10 +82,15 @@ class XMP2Assert::Converter
   Namespace = UUID.create_random
   private_constant :Namespace
 
-  def gen_tap xmp
-    n = gensym xmp
-    x = xmp.chomp.dump
-    return sprintf ".tap {|%s| assert_xmp(%s, %s) }", n, x, n
+  def gen_tap tok
+    xmp = tok.to_s.chomp.dump
+    case tok.to_sym
+    when :'~>' then
+      return sprintf " rescue (assert(%s, $!) and raise)", xmp
+    when :'=>' then
+      nam = gensym xmp
+      return sprintf ".tap {|%s| xmp2assert_assert(%s, %s) }", nam, xmp, nam
+    end
   end
 
   def end_of_expr? tok
@@ -94,6 +100,8 @@ class XMP2Assert::Converter
     when :semicolon   then return false
     when :comment     then return false
     when :'=>'        then return false
+    when :'!>'        then return false
+    when :'~>'        then return false
     when :>>          then return false
     when :nl          then return false
     when :ignored_nl  then return false
@@ -273,19 +281,18 @@ class XMP2Assert::Converter
     xmp = nil
     @tokens.each do |tok|
       case sym = tok.to_sym
-      when :'=>', :>> then
+      when :'=>', :>>, :'!>', :'~>' then
         if xmp and xmp.to_sym == sym then
           xmp.to_s.concat tok.to_s
-          tok.yylex  = :nl
-          tok.yylval = "\n"
+          tok.yylex  = :comment
+          tok.yylval = "#\n"
         else
           xmp = tok
         end
       when :comment then
         if xmp then
           xmp.to_s.concat tok.to_s.sub(/^#/, '')
-          tok.yylex  = :nl
-          tok.yylval = "\n"
+          tok.yylval = "#\n"
         else
           xmp = nil
         end
@@ -298,24 +305,43 @@ class XMP2Assert::Converter
   end
 
   def aggregate
-    return @tokens                               \
-      .select {|i| i.to_sym == :>> }             \
-      .map {|i| i.to_s.tap { i.yylval = "\n" } } \
-      .join
+    buf = Hash.new "" # ok
+    @tokens.reverse_each do |tok|
+      case sym = tok.to_sym
+      when :>>, :'!>', :'~>' then
+        buf[sym] = tok.to_s << buf[sym]
+        tok.yylex  = :comment
+        tok.yylval = "#\n"
+      when :sp, :nl then
+        next
+      else
+        break
+      end
+    end
+    # aggregation of ~> stops here, others continue.
+    @tokens.reverse_each do |tok|
+      case sym = tok.to_sym when :>>, :'!>' then
+        buf[sym] = tok.to_s << buf[sym]
+        tok.yylex  = :comment
+        tok.yylval = "#\n"
+      end
+    end
+    return buf.values_at :>>, :'!>', :'~>'
   end
 
   def render
-    @tokens.select {|i| i.to_sym == :'=>' }.each do |tok|
-      xmp = tok.to_s
-      tap = gen_tap xmp
-      xmp.replace "\n"
-      x, y = rev_lookup_expr tok
-      if x and x != y then
-        x.to_s.sub! %r/^/, '('
-        y.to_s.sub! %r/$/, ')'
-      end
-      y.to_s.sub! %r/$/ do
-        tap # use block to prevent backslash substitution
+    @tokens.each do |tok|
+      case tok.to_sym when :'=>', :'~>' then
+        tap = gen_tap tok
+        tok.to_s.replace "\n"
+        x, y = rev_lookup_expr tok
+        if x and x != y then
+          x.to_s.sub! %r/^/, '('
+          y.to_s.sub! %r/$/, ')'
+        end
+        y.to_s.sub! %r/$/ do
+          tap # use block to prevent backslash substitution
+        end
       end
     end
   end

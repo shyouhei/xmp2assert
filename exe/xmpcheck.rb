@@ -44,9 +44,7 @@ class TC_Main < Test::Unit::TestCase
       end
     else
       test f.__FILE__ do
-        t, o = XMP2Assert::Converter.convert f
-        t.eval binding        if k.include? :'=>'
-        assert_capture2e o, f if k.include? :'>>'
+        assert_xmp f
       end
     end
   end

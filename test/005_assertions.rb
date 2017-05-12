@@ -29,7 +29,7 @@ require 'xmp2assert/assertions'
 class TC005_Assertions < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
-  sub_test_case "#assert_xmp" do
+  sub_test_case "#assert_xmp_raw" do
     data({
       "class"   => [TrueClass, 'TrueClass'],
       "integer" => [1, '1'],
@@ -41,55 +41,19 @@ class TC005_Assertions < Test::Unit::TestCase
     })
 
     test "assertion success" do |(actual, expected)|
-      assert_xmp expected, actual
+      assert_xmp_raw expected, actual.inspect
     end
 
     test "assertion failure" do
       assert_raise Test::Unit::AssertionFailedError do
-        assert_xmp '2', 1
+        assert_xmp_raw '2', '1'
       end
     end
 
     test "assertion failure's message" do
       assert_raise_message(/foobar/) do
-        assert_xmp '2', 1, 'foobar'
+        assert_xmp_raw '2', '1', 'foobar'
       end
-    end
-  end
-
-  sub_test_case "#assert_capture2e" do
-    test "assertion success" do
-      q = XMP2Assert::Quasifile.new 'puts "foo"'
-      assert_capture2e "foo\n", q
-    end
-
-    test "assertion failure" do
-      assert_raise Test::Unit::AssertionFailedError do
-        q = XMP2Assert::Quasifile.new 'puts "foo"'
-        assert_capture2e "bar\n", q
-      end
-    end
-
-    test "unicode" do
-      q = XMP2Assert::Quasifile.new 'puts "\u674E\u5FB4"'
-      assert_capture2e "\u674E\u5FB4\n", q
-    end
-
-    test "non-unicode" do
-      source   = "puts \"\u674E\u5FB4\"".encode Encoding::Windows_31J
-      expected = "\u674E\u5FB4\n".encode Encoding::Windows_31J
-      qfile    = XMP2Assert::Quasifile.new source
-      assert_capture2e expected, qfile
-    end
-
-    test "stdin" do
-      q = XMP2Assert::Quasifile.new 'puts ARGF.read'
-      assert_capture2e "foo\n", q, stdin_data: 'foo'
-    end
-
-    test "no trailing newline" do
-      qfile = XMP2Assert::Quasifile.new 'STDOUT.write "foo"'
-      assert_capture2e "foo", qfile
     end
   end
 end

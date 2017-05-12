@@ -33,7 +33,7 @@ class TC003_Classifier < Test::Unit::TestCase
     "no mark"      => ['# comment',          []],
     "marked 1"     => ['0x1 # => 1',         [:'=>']],
     "marked 2"     => ['puts("x") # >> x',   [:'>>']],
-    "marked 3"     => ['puts("y") # ~> y',   [:'>>']],
+    "marked 3"     => ['puts("y") # ~> y',   [:'~>']],
     "multi mark"   => ["# => 1\n# => 2",     [:'=>']],
     "combined"     => ["# => 1\n# >> 2",     [:'=>', :'>>']],
   })

@@ -41,12 +41,8 @@ class TC006_Converter < Test::Unit::TestCase
       foo # >> 1
     end;
     src, out = XMP2Assert::Converter.convert qfile
-    assert_match(/assert_xmp\(\"\[1,/, src.read)
+    assert_match(/xmp2assert_assert\(\"\[1,/, src.read)
     assert_equal("1\n", out)
-    suppress do
-      src.eval binding
-    end
-    assert_capture2e(out, qfile)
   end
 
   test "syntax error" do

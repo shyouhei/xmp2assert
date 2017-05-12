@@ -26,6 +26,54 @@ It automatically checks for those comments and see if they are right.
 
 Really sorry but we have no dedicated document than the YARD. Pro-tip: look at `XMP2Assert::Assertions`
 
+## Languages understood by this library
+
+- Everything but comments are passed verbatimly to underlying ruby interpreter.  We don't go deep in this area.
+- There are currently four kinds of special comments that make sense.  All other comments are verbatimly passed to the underlying ruby interpreter (and then, silently ignored there).
+- The most basic `=>` comment describes the value of an expression that is immediately leading the comment.
+
+    ```ruby
+	1 + 2 # => 3
+	```
+
+- An exceptions is described by a `~>` comment.  Because exceptions are kind of control flows, the thing the comment describes tends to be a statement, not expression-in-general.
+
+    ```ruby
+	raise "foo" # ~> foo
+	```
+
+- Outputs are also described.  There are two kinds of IO comments; `>>` for stdout and `!>` for stderr.  Note however that They are checked buffered, not line-by-line.
+
+    ```ruby
+	puts "foo" # >> foo
+	```
+
+- Comments are not mixed i.e. you can't describe stderr and stdout in a same line.  You have to separate them in dedicated lines.
+
+    ```ruby
+	STDOUT.puts "foo"; STDERR.puts "bar"
+	# => nil
+	# >> foo
+	# ~> bar
+	```
+
+- The "expression that is immediately leading the comment" is not that obvious than you think.  For instance,
+
+    ```ruby
+	<<END + <<END.lines.length
+	foo
+	END
+	#{<<END}
+	bar
+	END
+	END
+	# => ...?
+	```
+
+	This is a valid ruby script but extraordinary complicated.  What is the expression that the comment at the last line describes?  It is strongly advised that you should not write such things and go concise.
+
+	Understanding of non-comment ruby expression is best effort; done using heuritics.
+
 ## What if I want to contribute?
 
 Before proceeding any further, you have to take this action:

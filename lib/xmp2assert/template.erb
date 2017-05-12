@@ -26,10 +26,59 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Because we don't want to pollute $", we write everything needed in this file.
+
+rx = IO.for_fd ARGV.shift.to_i, 'rb'
+tx = IO.for_fd ARGV.shift.to_i, 'wb'
+
+using Module.new {
+  refine Kernel do
+
+    private
+
+    Kernel.class_variable_set('@@rx', rx)
+    Kernel.class_variable_set('@@tx', tx)
+
+    def assert_xmp_send *argv
+      rx  = Kernel.class_variable_get('@@rx')
+      tx  = Kernel.class_variable_get('@@tx')
+      str = Marshal.dump argv
+      tx.puts str.length
+      tx.write str
+      tx.flush
+      if rx.gets then
+        return true
+      else
+        Process.exit false
+      end
+    end
+  end
+}
+
+# Simulates test-unit.
+# @param xmp      [String] expected pattern of inspect.
+# @param expr     [Object] object to check.
+# @param message  [String] extra failure message.
+# @note  assertion is done in parent process, not in it.
+def xmp2assert_assert xmp, expr, c = caller
+  return assert_xmp_send xmp, expr.inspect, c
+end
+
+# Here we go.
+
 file = "<%= script.__FILE__ %>" #=
 line = <%= script.__LINE__ %> #=
 src  = ::DATA.read
+% if exception
+begin
+  eval src, binding, file, line
+rescue Exception => e
+  expected =  <%= exception %> #=
+  xmp2assert_assert expected, e, e.backtrace
+end
+% else
 eval src, binding, file, line
+% end
 
 # Below is a generated software, sourced from <%= script.__FILE__ %>.
 # Above copyright notice does not apply any further.  Consult the original.

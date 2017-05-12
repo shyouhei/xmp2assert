@@ -28,7 +28,4 @@
 #
 # - {XMP2Assert::Assertions} The assertion framework.
 # - {XMP2Assert::Classifier} Check if the given file actually has the comment.
-# - {XMP2Assert::Converter}  Source code in-place editor using Ripper.
-# - {XMP2Assert::Quasifile}  IO/String abstraction layer
-# - {XMP2Assert::PrettierInspect} Helper module to ease inspection.
 module XMP2Assert; end

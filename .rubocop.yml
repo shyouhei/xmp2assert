@@ -34,7 +34,17 @@ Lint/AmbiguousBlockAssociation:
 Lint/EmptyWhen:
   Enabled: false
 
+Metrics/ParameterLists:
+  Enabled: false
+
 Rails:
+  Enabled: false
+
+Security/Eval:
+  # I KNOW WHAT I DO. Please stop annoying me.
+  Enabled: false
+
+Security/MarshalLoad:
   Enabled: false
 
 Style/Alias:
@@ -92,6 +102,9 @@ Style/FormatString:
   Enabled: false
 
 Style/GuardClause:
+  Enabled: false
+
+Style/IdenticalConditionalBranches:
   Enabled: false
 
 Style/IndentHash:
@@ -157,6 +170,9 @@ Style/StringLiteralsInInterpolation:
 Style/SymbolArray:
   Enabled: false
 
+Style/TernaryParentheses:
+  Enabled: false
+
 Style/TrailingCommaInLiteral:
   Enabled: false
 
@@ -178,9 +194,15 @@ Style/WhileUntilDo:
 Style/WhileUntilModifier:
   Enabled: false
 
+Lint/AssignmentInCondition:
+  Exclude:
+    # I know what I do.
+    - 'lib/xmp2assert/assertions.rb'
+
 Lint/UselessAccessModifier:
   Exclude:
-    # I think detecting this file is a rubocop bug.
+    # I think detecting these files is a rubocop bug.
+    - 'lib/xmp2assert/renderer.rb'
     - 'lib/xmp2assert/validator.rb'
 
 Lint/UselessAssignment:

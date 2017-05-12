@@ -23,69 +23,70 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'rbconfig'
-require 'open3'
-require 'tempfile'
-require 'erb'
 require 'test/unit'
 require 'test/unit/assertions'
 require 'test/unit/assertion-failed-error'
 require_relative 'namespace'
 require_relative 'quasifile'
 require_relative 'xmp2rexp'
+require_relative 'renderer'
+require_relative 'spawn'
 
 # Helper module that implements assertions.
 module XMP2Assert::Assertions
   include Test::Unit::Assertions
   include XMP2Assert::XMP2Rexp
+  include XMP2Assert::Renderer
 
-  # Run a ruby script and assert for its output.
+  # Run a ruby script and assert for its comment.  This is the main API.
   #
   # ```ruby
-  # assert_capture2e "foo\n", Quasifile.new("puts 'foo'")
+  # assert_xmp "1 + 2 # => 3"
   # ```
   #
-  # @param expected [String]               expected output.
-  # @param script   [Quasifile]            a ruby script.
-  # @param message  [String]               extra failure message.
-  # @param rubyopts [Array<String>]        extra opts to pass to ruby process.
-  # @param opts     [Hash{Symbol=>Object}] extra opts to pass to spawn.
-  # @note
-  #   As the method name implies the assertion is against both stdin and stderr
-  #   at once.  This is for convenience.
-  def assert_capture2e expected, script, message = nil, rubyopts: nil, **opts
-    qscript = XMP2Assert::Quasifile.new script
-    actual, _ = ruby qscript, rubyopts: rubyopts, **opts
-    actual.force_encoding expected.encoding
-    return assert_xmp_raw expected, actual, message
+  # @param script     [Quasifile]     a ruby script.
+  # @param message    [String]        extra failure message.
+  # @param rubyopts   [Array<String>] extra opts to pass to ruby process.
+  # @param stdin_data [String]        extra stdin to pass to ruby process.
+  # @param opts       [Hash]          extra opts to pass to Kernel.spawn.
+  def assert_xmp script, message = nil, stdin_data: '', **opts
+    qscript        = XMP2Assert::Quasifile.new script
+    qf, qo, qe, qx = XMP2Assert::Converter.convert qscript
+    render qf, qx do |f|
+      XMP2Assert::Spawn.new f, **opts do |_, i, o, e, r, t|
+        i.write stdin_data
+        i.close
+        out = Thread.new { o.read }
+        err = Thread.new { e.read }
+        while n = t.gets do
+          x = t.read n.to_i
+          expected, actual, bt = *Marshal.load(x)
+          begin
+            assert_xmp_raw expected, actual, message
+          rescue Test::Unit::AssertionFailedError => x
+            r.close
+            x.set_backtrace bt
+            raise x
+          else
+            r.puts
+          end
+        end
+        assert_xmp_raw qo, out.value, message unless qo.empty?
+        assert_xmp_raw qe, err.value, message unless qe.empty?
+      end
+    end
   end
 
-  # Assert if the given expression is in the same form of xmp.
-  #
-  # ```ruby
-  # assert_xmp '#<Object:0x007f896c9b49c8>', Object.new
-  # ```
-  #
-  # @param xmp      [String] expected pattern of inspect.
-  # @param expr     [Object] object to check.
-  # @param message  [String] extra failure message.
-  def assert_xmp xmp, expr, message = nil
-    assert_xmp_raw xmp, expr.inspect, message
-  end
-
-  private
-
-  # :TODO: is it private?
+  # :TODO: tbw
   def assert_xmp_raw xmp, actual, message = nil
     expected = xmp2rexp xmp
 
     raise unless expected.match actual
   rescue
     # Regexp#match can raise. That should also be a failure.
-    msg = genmsg xmp, actual, message
     ix  = Test::Unit::Assertions::AssertionMessage.convert xmp
     ia  = Test::Unit::Assertions::AssertionMessage.convert actual
-    ex  = Test::Unit::AssertionFailedError.new(msg,
+    ex  = Test::Unit::AssertionFailedError.new(message,
                     expected: xmp,
                       actual: actual,
           inspected_expected: ix,
@@ -94,70 +95,5 @@ module XMP2Assert::Assertions
     raise ex
   else
     return self # or...?
-  end
-
-  # We support pre-&. versions
-  def try obj, msg
-    return obj.send msg
-  rescue NoMethodError
-    return nil
-  end
-
-  def genmsg x, y, z = nil
-    diff = Test::Unit::Assertions::AssertionMessage.delayed_diff x, y
-    if try(x, :ascii_only?) && try(y, :ascii_only?) then
-      fmt  = "<?> expected but was\n<?>.?"
-      argv = [x, y, diff]
-    elsif try(x, :encoding) != try(y, :encoding) then
-      fmt  = "<?>(?) expected but was\n<?>(?).?"
-      argv = [x, x.encoding.name, y, y.encoding.name, diff]
-    else
-      fmt  = "<?> expected but was\n<?>.?"
-      argv = [x, y, diff]
-    end
-    return Test::Unit::Assertions::AssertionMessage.new z, fmt, argv
-  end
-
-  def erb
-    unless defined? @@erb
-      myself = Pathname.new __FILE__
-      path   = myself + '../template.erb'
-      src    = path.read mode: 'rb:binary:binary'
-      @@erb  = ERB.new src, nil, '%-'
-      @@erb.filename = path.realpath.to_path if defined? $DEBUG
-    end
-    return @@erb
-  end
-
-  def empty_binding
-    # This `eval 'binding'` does not return the current binding but creates one
-    # on top  of it.  To  make it  really empty, this  method has to  have zero
-    # arity, and zero local variables.
-    return eval 'binding'
-  end
-
-  def empty_binding_with hash
-    return empty_binding.tap do |b|
-      hash.each_pair do |k, v|
-        b.local_variable_set k, v
-      end
-    end
-  end
-
-  def ruby script, rubyopts: nil, **opts
-    Tempfile.create '' do |f|
-      b = empty_binding_with script: script
-      s = erb.result b
-      f.write s
-      argv = [RbConfig.ruby, rubyopts, f.path]
-      if defined? ENV['BUNDLE_BIN_PATH']
-        argv = [ENV['BUNDLE_BIN_PATH'], 'exec'] + argv
-      end
-      argv.flatten!
-      argv.compact!
-      f.flush
-      # STDERR.puts(f.path) ; sleep # for debug
-      return Open3.capture2e(*argv, binmode: true, **opts)
-    end
   end
 end

@@ -25,8 +25,5 @@
 
 require_relative 'xmp2assert/namespace' # needs be first
 require_relative 'xmp2assert/version'
-require_relative 'xmp2assert/prettier_inspect'
-require_relative 'xmp2assert/quasifile'
-require_relative 'xmp2assert/converter'
 require_relative 'xmp2assert/classifier'
 require_relative 'xmp2assert/assertions'

@@ -178,19 +178,6 @@ class TC009_Integrated < Test::Unit::TestCase
   })
 
   test "assert" do |expr|
-    begin
-      v, $-w = $-w, nil
-      src, out = XMP2Assert::Converter.convert expr
-      if out.empty?
-        src.eval binding
-      else
-        suppress do
-          src.eval binding
-        end
-        assert_capture2e(out, src)
-      end
-    ensure
-      $-w = v
-    end
+    assert_xmp expr
   end
 end

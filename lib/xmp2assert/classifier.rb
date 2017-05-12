@@ -41,19 +41,20 @@ require_relative 'parser'
 # ```
 module XMP2Assert::Classifier
   # @param  (see XMP2Assert::Parser.new)
-  # @return [<Symbol>]  either empty, :=>, :>>, or both.
+  # @return [<Symbol>]  any combination of :=>, :>>, :!>, :~>, or empty.
   # @note               syntax error results in empty return value.
   def self.classify obj, file = nil, line = nil
     parser = XMP2Assert::Parser.new obj, file, line
   rescue SyntaxError
     return []
   else
-    return parser                                              \
-      .tokens                                                  \
-      .map(&:to_sym)                                           \
-      .sort                                                    \
-      .uniq                                                    \
-      .map {|i| case i when :'=>', :'>>' then i else nil end } \
+    mid = %i[=> >> !> ~>]
+    return parser                                      \
+      .tokens                                          \
+      .map(&:to_sym)                                   \
+      .sort                                            \
+      .uniq                                            \
+      .map {|i| case i when *mid then i else nil end } \
       .compact
   end
 end
