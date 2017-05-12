@@ -49,7 +49,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/shyouhei/xmp2assert'
   spec.license       = 'MIT'
   spec.files         = `git ls-files -z`.split("\x0").reject { |f|
-    f.match(%r'^(test|spec|features)/')
+    f.match(%r'^(test|spec|features|samples)/')
   }
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r'^exe/') { |f| File.basename(f) }

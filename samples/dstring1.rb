@@ -23,20 +23,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'test_helper'
-require 'xmp2assert'
-
-class TC009_Integrated < Test::Unit::TestCase
-  include XMP2Assert::Assertions
-
-  pwd = Pathname.new __dir__
-  root = pwd + '..'
-  Pathname.glob(root + 'samples/**/*.rb') do |p|
-    q = p.realpath.relative_path_from root
-    data q.to_path => p
-  end
-
-  test "assert_xmp" do |expr|
-    assert_xmp expr
-  end
-end
+# Emacs ruby-mode can't parse the line below; yes we can.
+"#{3; "#{1; 2}"}" # => "2"

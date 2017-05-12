@@ -60,7 +60,8 @@ using Module.new {
 # @param expr     [Object] object to check.
 # @param message  [String] extra failure message.
 # @note  assertion is done in parent process, not in it.
-def xmp2assert_assert xmp, expr, c = caller
+def xmp2assert_assert xmp, expr, c = caller(3)
+  c.reject! {|i| i.start_with? __FILE__ }
   return assert_xmp_send xmp, expr.inspect, c
 end
 
