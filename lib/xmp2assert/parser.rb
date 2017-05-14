@@ -48,21 +48,11 @@ class XMP2Assert::Parser < Ripper
     return @qfile.__FILE__, @qfile.__LINE__
   end
 
-  # Find tokens that are in the same line as the argument.
+  # Split tokens into lines.
   #
-  # ```ruby
-  # [ 1, # => 1
-  #   2, # => 2
-  # ]    # => [1, 2]
-  # ```
-  #
-  # It will return `[(:sp ' ') (:int 2) (:'=>' "2")]` for `(:'=>' "2")`.
-  #
-  # @param tok [Token] a token to look at.
-  # @return    [Array] tokens of the same line as the argument.
-  def same_line_as tok
-    f, l = tok.__FILE__, tok.__LINE__
-    return @tokens.select {|i| i.__FILE__ == f }.select {|i| i.__LINE__ == l }
+  # @return [Array<Array<Token>>] tokens, split into lines.
+  def lines
+    return @lines ||= @tokens.group_by(&:__LINE__)
   end
 
   private

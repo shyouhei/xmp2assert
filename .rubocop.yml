@@ -26,6 +26,7 @@ AllCops:
   DisplayCopNames: true
   Exclude:
     - "vendor/**/*"
+    - "samples/**/*"
   TargetRubyVersion: 2.2 # 2.3 # 2.4 # 2.5
 
 Lint/AmbiguousBlockAssociation:
@@ -198,6 +199,7 @@ Lint/AssignmentInCondition:
   Exclude:
     # I know what I do.
     - 'lib/xmp2assert/assertions.rb'
+    - 'lib/xmp2assert/converter.rb'
 
 Lint/UselessAccessModifier:
   Exclude:

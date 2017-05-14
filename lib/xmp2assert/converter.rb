@@ -96,6 +96,7 @@ class XMP2Assert::Converter
   def end_of_expr? tok
     case tok.to_sym
     when :sp          then return false
+    when :period      then return false
     when :comma       then return false
     when :semicolon   then return false
     when :comment     then return false
@@ -172,10 +173,46 @@ class XMP2Assert::Converter
     before.replace after
   end
 
+  def effective_first_token_of line
+    line.each do |tok|
+      return tok unless tok.to_sym == :sp
+    end
+    return nil
+  end
+
+  def effective_last_token_of line
+    line.reverse_each do |tok|
+      case tok.to_sym
+      when :sp         then next
+      when :comment    then next
+      when :'=>'       then next
+      when :'!>'       then next
+      when :'~>'       then next
+      when :>>         then next
+      when :nl         then next
+      when :ignored_nl then next
+      else return tok
+      end
+    end
+    return nil
+  end
+
+  def period_continued? tok
+    line = @program.lines[tok.__LINE__ ]
+    t = effective_first_token_of line
+    return true  if t.to_sym == :period
+    return false if tok.__LINE__ <= 1
+
+    line = @program.lines[tok.__LINE__ - 1]
+    return false unless t = effective_last_token_of(line)
+    return true  if t.to_sym == :period
+    return false
+  end
+
   def find_start stop
-    line = @program.same_line_as stop
+    line = @program.lines[stop.__LINE__]
     line.sort!
-    line.select! {|i| i.__COLUMN__ <= stop.__COLUMN__ }
+    line = line.select {|i| i.__COLUMN__ <= stop.__COLUMN__ }
     line = line.drop_while {|i| not beginning_of_expr? i }
     line2 = tmp_reroute_heredoc line
     until valid? line2 do
@@ -266,9 +303,18 @@ class XMP2Assert::Converter
   #      one: 1,
   #    } # => {:one=>1}
   #    ```
+  #
+  # 6. special case for periods... you can end a line with period, or
+  #    begin with it; that indicates the line continues.  We detect
+  #    that and handle as continuous lines.
+  #
+  #    A backslash-newline can also continue a line but we are dealing
+  #    with comments so that can never happen here.
   def rev_lookup_expr xmp
     needs_start, stop = find_stop xmp
     return nil, stop unless needs_start
+    return nil, stop if period_continued? stop
+
     list = find_start stop
 
     if list.empty? then
