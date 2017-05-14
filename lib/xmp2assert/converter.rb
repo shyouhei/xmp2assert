@@ -86,7 +86,7 @@ class XMP2Assert::Converter
     xmp = tok.to_s.chomp.dump
     case tok.to_sym
     when :'~>' then
-      return sprintf " rescue (assert(%s, $!) and raise)", xmp
+      return sprintf " rescue (xmp2assert_assert(%s, $!) and raise)", xmp
     when :'=>' then
       nam = gensym xmp
       return sprintf ".tap {|%s| xmp2assert_assert(%s, %s) }", nam, xmp, nam

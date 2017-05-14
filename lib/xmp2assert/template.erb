@@ -28,6 +28,7 @@
 
 # Because we don't want to pollute $", we write everything needed in this file.
 
+saved_binding = TOPLEVEL_BINDING.dup
 rx = IO.for_fd ARGV.shift.to_i, 'rb'
 tx = IO.for_fd ARGV.shift.to_i, 'wb'
 
@@ -70,15 +71,18 @@ end
 file = "<%= script.__FILE__ %>" #=
 line = <%= script.__LINE__ %> #=
 src  = ::DATA.read
-% if exception
+% if exception and not exception.empty?
 begin
-  eval src, binding, file, line
+  eval src, saved_binding, file, line
 rescue Exception => e
-  expected =  <%= exception %> #=
+  b = e.backtrace
+  b.reject! {|i| i.start_with? __FILE__ }
+  e.set_backtrace b
+  expected = <%= exception.dump %> #=
   xmp2assert_assert expected, e, e.backtrace
 end
 % else
-eval src, binding, file, line
+eval src, saved_binding, file, line
 % end
 
 # Below is a generated software, sourced from <%= script.__FILE__ %>.
