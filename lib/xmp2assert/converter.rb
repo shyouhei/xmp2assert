@@ -188,7 +188,10 @@ class XMP2Assert::Converter
   def need_paren? list
     start = list.first.to_sym.to_s
 
-    if %r/(.+)_beg$/ =~ start then
+    if "embexpr_beg" == start then
+      return false # paren breaks expression
+
+    elsif %r/(.+)_beg$/ =~ start then
       t = $1
       list.inject 0 do |i, tok|
         tt = tok.to_sym.to_s
