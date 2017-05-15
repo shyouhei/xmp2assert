@@ -29,6 +29,7 @@ require 'test/unit/assertion-failed-error'
 require_relative 'namespace'
 require_relative 'quasifile'
 require_relative 'xmp2rexp'
+require_relative 'converter'
 require_relative 'renderer'
 require_relative 'spawn'
 
