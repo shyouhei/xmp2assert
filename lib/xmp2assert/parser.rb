@@ -63,7 +63,7 @@ class XMP2Assert::Parser < Ripper
 
   def on_comment c
     case c
-    when /^# ([~=!>]>) / then
+    when /^# ([~=!>]>)(?: |$)/ then
       yylex = $1.intern
       yylval = $'
     else

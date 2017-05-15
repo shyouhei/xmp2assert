@@ -339,9 +339,16 @@ class XMP2Assert::Converter
           xmp = tok
         end
       when :comment then
+        re = /^#\s*/
         if xmp then
-          xmp.to_s.concat tok.to_s.sub(/^#/, '')
-          tok.yylval = "#\n"
+          space = re.match(tok.to_s).to_s.length
+          if xmp.__COLUMN__ + 5 <= tok.__COLUMN__ + space # 5 is `# => `
+            xmp.to_s.concat tok.to_s.sub(re, ' ')
+            tok.yylval = "#\n"
+          else
+            # dedent
+            xmp = nil
+          end
         else
           xmp = nil
         end
