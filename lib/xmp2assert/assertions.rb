@@ -47,7 +47,6 @@ module XMP2Assert::Assertions
   #
   # @param script     [Quasifile]     a ruby script.
   # @param message    [String]        extra failure message.
-  # @param rubyopts   [Array<String>] extra opts to pass to ruby process.
   # @param stdin_data [String]        extra stdin to pass to ruby process.
   # @param opts       [Hash]          extra opts to pass to Kernel.spawn.
   def assert_xmp script, message = nil, stdin_data: '', **opts

@@ -26,7 +26,7 @@
 require_relative 'test_helper'
 require 'xmp2assert/parser'
 
-class TC009_Parser < Test::Unit::TestCase
+class TC008_Parser < Test::Unit::TestCase
   test "error" do
     # We are not going to test ruby's pitfall-ish syntax errors here.  That's a
     # ripper's job.  We check to see if OUR class raises exception for them.

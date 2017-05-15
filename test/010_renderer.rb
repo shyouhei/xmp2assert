@@ -24,19 +24,42 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert'
+require 'rbconfig'
+require 'xmp2assert/renderer'
+require 'xmp2assert/quasifile'
 
-class TC009_Integrated < Test::Unit::TestCase
-  include XMP2Assert::Assertions
+class TC010_Renderer < Test::Unit::TestCase
+  include XMP2Assert::Renderer
 
-  pwd = Pathname.new __dir__
-  root = pwd + '..'
-  Pathname.glob(root + 'samples/**/*.rb') do |p|
-    q = p.realpath.relative_path_from root
-    data q.to_path => p
-  end
+  sub_test_case ".render" do
+    setup do
+      @files = []
+      @src   = XMP2Assert::Quasifile.new <<-'end;', 'foo', 32768
+        puts "foo"
+      end;
+    end
 
-  test "assert_xmp" do |expr|
-    assert_xmp expr
+    teardown do
+      @files.each do |f|
+        File.unlink f.to_path
+      end
+    end
+
+    test "with block" do
+      obj = Object.new
+      result = render @src do |f|
+        assert_kind_of(File, f)
+        assert(system("#{RbConfig.ruby} -wc #{f.to_path}", out: IO::NULL))
+        next obj
+      end
+      assert_same(obj, result)
+    end
+
+    test "without block" do
+      f = render @src
+      @files << f
+      assert_kind_of(File, f)
+      assert(system("#{RbConfig.ruby} -wc #{f.to_path}", out: IO::NULL))
+    end
   end
 end

@@ -24,56 +24,59 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert/assertions'
+require 'tempfile'
+require 'xmp2assert/spawn'
 
-class TC005_Assertions < Test::Unit::TestCase
-  include XMP2Assert::Assertions
-
-  sub_test_case "#assert_xmp_raw" do
-    data({
-      "class"   => [TrueClass, 'TrueClass'],
-      "integer" => [1, '1'],
-      "numeric" => [1.1, '1.1'],
-      "object"  => [Object.new, '#<Object:0x007f896c9b49c8>'],
-      "array"   => [[1], '[1]'],
-      "hash"    => [{ 1 => 2 }, '{1=>2}'],
-      "string"  => ['"foo.bar"', '"\\"foo.bar\\""'],
-    })
-
-    test "assertion success" do |(actual, expected)|
-      assert_xmp_raw expected, actual.inspect
-    end
-
-    test "assertion failure" do
-      assert_raise Test::Unit::AssertionFailedError do
-        assert_xmp_raw '2', '1'
+class TC009_Spawn < Test::Unit::TestCase
+  Program = <<-'end;'
+    rx = IO.for_fd ARGV.shift.to_i, 'rb'
+    tx = IO.for_fd ARGV.shift.to_i, 'wb'
+    begin
+      while a = IO.select([STDIN, rx]) do
+        rs, = *a
+        rs.each do |i|
+          j = i.readpartial 4096
+          case i
+          when STDIN then
+            tx.printf "STDIN: %s", j
+          when rx then
+            tx.printf "rx: %s", j
+          end
+          tx.flush
+        end
       end
+    rescue IOError
+      # OK, end of input
+      Process.exit true
     end
+  end;
 
-    test "assertion failure's message" do
-      assert_raise_message(/foobar/) do
-        assert_xmp_raw '2', '1', 'foobar'
-      end
-    end
+  setup do
+    @program = Tempfile.create ''
+    @program.write Program
+    @program.flush
   end
 
-  sub_test_case "#assert_xmp" do
-    test "assertion failure" do
-      assert_raise Test::Unit::AssertionFailedError do
-        assert_xmp '1 + 1 # => 3'
-      end
-    end
+  teardown do
+    @program.close
+    File.unlink @program.to_path
+  end
 
-    test "syntax error" do
-      assert_raise SyntaxError do
-        assert_xmp '"premature end of string'
-      end
-    end
+  test "#initialize" do
+    XMP2Assert::Spawn.new @program do |p, i, o, e, r, t|
+      assert_kind_of(Integer, p)
+      assert_kind_of(IO, i)
+      assert_kind_of(IO, o)
+      assert_kind_of(IO, e)
+      assert_kind_of(IO, r)
+      assert_kind_of(IO, t)
 
-    test "nothing raised when nothing tested" do
-      assert_nothing_raised do
-        assert_xmp '1 + 1 # unrelated comment'
-      end
+      i.puts "foo"
+      i.flush
+      assert_equal("STDIN: foo\n", t.gets)
+      r.puts "bar"
+      r.flush
+      assert_equal("rx: bar\n", t.gets)
     end
   end
 end

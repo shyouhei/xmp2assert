@@ -78,6 +78,9 @@ Style/ClassAndModuleChildren:
 Style/ClassVars:
   Enabled: false
 
+Style/ConstantName:
+  Enabled: false
+
 Style/ElseAlignment:
   Enabled: false
 
@@ -129,7 +132,13 @@ Style/MultilineIfThen:
 Style/MultilineMethodCallIndentation:
   Enabled: false
 
+Style/MutableConstant:
+  Enabled: false
+
 Style/Not:
+  Enabled: false
+
+Style/NumericLiterals:
   Enabled: false
 
 Style/ParallelAssignment:

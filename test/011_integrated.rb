@@ -24,56 +24,33 @@
 # SOFTWARE.
 
 require_relative 'test_helper'
-require 'xmp2assert/assertions'
+require 'xmp2assert'
 
-class TC005_Assertions < Test::Unit::TestCase
+class TC011_Integrated < Test::Unit::TestCase
   include XMP2Assert::Assertions
 
-  sub_test_case "#assert_xmp_raw" do
-    data({
-      "class"   => [TrueClass, 'TrueClass'],
-      "integer" => [1, '1'],
-      "numeric" => [1.1, '1.1'],
-      "object"  => [Object.new, '#<Object:0x007f896c9b49c8>'],
-      "array"   => [[1], '[1]'],
-      "hash"    => [{ 1 => 2 }, '{1=>2}'],
-      "string"  => ['"foo.bar"', '"\\"foo.bar\\""'],
-    })
+  pwd = Pathname.new __dir__
+  root = pwd + '..'
+  d = Pathname.glob(root + 'samples/**/*.rb').inject Hash.new do |h, p|
+    q = p.realpath.relative_path_from root
+    h[q.to_path] = p
+    next h
+  end
 
-    test "assertion success" do |(actual, expected)|
-      assert_xmp_raw expected, actual.inspect
-    end
-
-    test "assertion failure" do
-      assert_raise Test::Unit::AssertionFailedError do
-        assert_xmp_raw '2', '1'
-      end
-    end
-
-    test "assertion failure's message" do
-      assert_raise_message(/foobar/) do
-        assert_xmp_raw '2', '1', 'foobar'
+  sub_test_case "validness" do
+    data d
+    test "validness" do |expr|
+      assert_nothing_raised do
+        q, _ = XMP2Assert::Converter.convert expr
+        XMP2Assert::Parser.new q
       end
     end
   end
 
-  sub_test_case "#assert_xmp" do
-    test "assertion failure" do
-      assert_raise Test::Unit::AssertionFailedError do
-        assert_xmp '1 + 1 # => 3'
-      end
-    end
-
-    test "syntax error" do
-      assert_raise SyntaxError do
-        assert_xmp '"premature end of string'
-      end
-    end
-
-    test "nothing raised when nothing tested" do
-      assert_nothing_raised do
-        assert_xmp '1 + 1 # unrelated comment'
-      end
+  sub_test_case "assertion" do
+    data d
+    test "assert_xmp" do |expr|
+      assert_xmp expr
     end
   end
 end

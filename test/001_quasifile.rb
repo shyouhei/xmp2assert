@@ -159,4 +159,24 @@ class TC001_Quasifile < Test::Unit::TestCase
       end
     end
   end
+
+  sub_test_case "#eval" do
+    test "runs" do
+      q = XMP2Assert::Quasifile.new "1 + 1"
+      assert_equal 2, q.eval
+    end
+
+    test "sets callback" do
+      q = XMP2Assert::Quasifile.new "raise", "foo", 32768
+      begin
+        q.eval
+      rescue => e
+        loc = e.backtrace_locations[0]
+        assert_equal "foo", loc.path
+        assert_equal 32768, loc.lineno
+      else
+        flunk
+      end
+    end
+  end
 end
