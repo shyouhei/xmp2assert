@@ -38,6 +38,10 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
     "hash"    => ['{1=>2}', /\A\{1=>2\}\n?\z/],
     "string"  => ['"foo.bar"', /\A"foo\.bar"\n?\z/],
     "dstr"    => ['"foo#{bar}"', /\A"foo\#\{bar\}"\n?\z/],
+    "\\n #0"  => ['foo',     /\Afoo\n?\z/],
+    "\\n #1"  => ["foo\n",   /\Afoo\n?\z/],
+    "\\n #2"  => ["foo\n\n", /\Afoo\n{2}\z/],
+    "\\n #3"  => ['foo\n',   /\Afoo\\n\n?\z/],
     "complex" => [ <<'EOF', /\A#{<<'EOF'.chomp.gsub(/(\n|\s)+/, '\s+')}\n?\z/],
 #<PP:0x007fe02908fe88
  @buffer=[],
