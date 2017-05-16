@@ -27,8 +27,6 @@ require_relative 'test_helper'
 require 'xmp2assert/xmp2rexp'
 
 class TC004_XMP2Rexp < Test::Unit::TestCase
-  include XMP2Assert::XMP2Rexp
-
   data({
     "class"   => ['TrueClass', /\ATrueClass\n?\z/],
     "integer" => ['1', /\A1\n?\z/],
@@ -92,7 +90,7 @@ EOF
   })
 
   test "escape" do |(expr, expected)|
-    actual = xmp2rexp expr
+    actual = XMP2Assert::XMP2Rexp.xmp2rexp expr
     assert_equal actual, expected
     assert_match actual, expr
   end

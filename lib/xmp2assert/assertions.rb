@@ -36,8 +36,6 @@ require_relative 'spawn'
 # Helper module that implements assertions.
 module XMP2Assert::Assertions
   include Test::Unit::Assertions
-  include XMP2Assert::XMP2Rexp
-  include XMP2Assert::Renderer
 
   # Run a ruby script and assert for its comment.  This is the main API.
   #
@@ -52,7 +50,7 @@ module XMP2Assert::Assertions
   def assert_xmp script, message = nil, stdin_data: '', **opts
     qscript        = XMP2Assert::Quasifile.new script
     qf, qo, qe, qx = XMP2Assert::Converter.convert qscript
-    render qf, qx do |f|
+    XMP2Assert::Renderer.render qf, qx do |f|
       XMP2Assert::Spawn.new f, **opts do |_, i, o, e, r, t|
         i.write stdin_data
         i.close
@@ -73,13 +71,14 @@ module XMP2Assert::Assertions
         end
         assert_xmp_raw qo, out.value, message unless qo.empty?
         assert_xmp_raw qe, err.value, message unless qe.empty?
+        stderr_pass_through qe, err
       end
     end
   end
 
   # :TODO: tbw
   def assert_xmp_raw xmp, actual, message = nil
-    expected = xmp2rexp xmp
+    expected = XMP2Assert::XMP2Rexp.xmp2rexp xmp
 
     raise unless expected.match actual
   rescue
@@ -95,5 +94,14 @@ module XMP2Assert::Assertions
     raise ex
   else
     return self # or...?
+  end
+
+  private
+
+  def stderr_pass_through qe, err
+    return unless $-w
+    return unless qe.empty?
+    return if err.value.empty?
+    STDERR.puts err.value
   end
 end

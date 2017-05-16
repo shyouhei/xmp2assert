@@ -50,11 +50,16 @@ class XMP2Assert::Spawn
     begin
       pid = Process.spawn(*argv, opts)
       theirs.each(&:close)
-      stdin, stdout, stdrrr, rx, tx = * ours
+      stdin, stdout, stdrrr, rx, tx = *ours
       yield pid, stdin, stdout, stdrrr, rx, tx
     ensure
-      ours.each(&:close)
-      Process.waitpid pid if pid
+      begin
+        ours.each(&:close)
+      rescue IOError
+        # OK, nothing can be done by us for closed streams.
+      ensure
+        Process.waitpid pid if pid
+      end
     end
   end
 

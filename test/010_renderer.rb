@@ -29,37 +29,33 @@ require 'xmp2assert/renderer'
 require 'xmp2assert/quasifile'
 
 class TC010_Renderer < Test::Unit::TestCase
-  include XMP2Assert::Renderer
+  setup do
+    @files = []
+    @src   = XMP2Assert::Quasifile.new <<-'end;', 'foo', 32768
+      puts "foo"
+    end;
+  end
 
-  sub_test_case ".render" do
-    setup do
-      @files = []
-      @src   = XMP2Assert::Quasifile.new <<-'end;', 'foo', 32768
-        puts "foo"
-      end;
+  teardown do
+    @files.each do |f|
+      File.unlink f.to_path
     end
+  end
 
-    teardown do
-      @files.each do |f|
-        File.unlink f.to_path
-      end
-    end
-
-    test "with block" do
-      obj = Object.new
-      result = render @src do |f|
-        assert_kind_of(File, f)
-        assert(system("#{RbConfig.ruby} -wc #{f.to_path}", out: IO::NULL))
-        next obj
-      end
-      assert_same(obj, result)
-    end
-
-    test "without block" do
-      f = render @src
-      @files << f
+  test "with block" do
+    obj = Object.new
+    result = XMP2Assert::Renderer.render @src do |f|
       assert_kind_of(File, f)
       assert(system("#{RbConfig.ruby} -wc #{f.to_path}", out: IO::NULL))
+      next obj
     end
+    assert_same(obj, result)
+  end
+
+  test "without block" do
+    f = XMP2Assert::Renderer.render @src
+    @files << f
+    assert_kind_of(File, f)
+    assert(system("#{RbConfig.ruby} -wc #{f.to_path}", out: IO::NULL))
   end
 end

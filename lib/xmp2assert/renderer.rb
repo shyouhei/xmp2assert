@@ -30,12 +30,12 @@ require_relative 'namespace'
 require_relative 'quasifile'
 
 # Compiles a {XMP2Assert::Quasifile} into a separate ruby script.
-module XMP2Assert::Renderer
+class XMP2Assert::Renderer
 
   # I learned this handy "super-private" maneuver from @a_matsuda
   # cf: https://github.com/rails/rails/pull/27363/files
   using Module.new {
-    refine XMP2Assert::Renderer do
+    refine XMP2Assert::Renderer.singleton_class do
       private
 
       myself = Pathname.new __FILE__
@@ -59,7 +59,7 @@ module XMP2Assert::Renderer
   # @param exception [String]    :TBD:
   # @return          [File]      rendered file, if no block is given.
   # @yieldparam      [File]      rendered file, if block is given.
-  def render qfile, exception = nil
+  def self.render qfile, exception = nil
     s = erb qfile, exception
     if defined? yield
       Tempfile.create '' do |f|

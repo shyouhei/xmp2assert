@@ -32,38 +32,19 @@ saved_binding = TOPLEVEL_BINDING.dup
 rx = IO.for_fd ARGV.shift.to_i, 'rb'
 tx = IO.for_fd ARGV.shift.to_i, 'wb'
 
-using Module.new {
-  refine Kernel do
+private
 
-    private
-
-    Kernel.class_variable_set('@@rx', rx)
-    Kernel.class_variable_set('@@tx', tx)
-
-    def assert_xmp_send *argv
-      rx  = Kernel.class_variable_get('@@rx')
-      tx  = Kernel.class_variable_get('@@tx')
-      str = Marshal.dump argv
-      tx.puts str.length
-      tx.write str
-      tx.flush
-      if rx.gets then
-        return true
-      else
-        Process.exit false
-      end
-    end
+define_method :xmp2assert_assert do |xmp, expr, bt = caller(3)|
+  bt.reject! {|i| i.start_with? __FILE__ }
+  str = Marshal.dump [xmp, expr.inspect, bt]
+  tx.puts str.length
+  tx.write str
+  tx.flush
+  if rx.gets then
+    return true
+  else
+    Process.exit false
   end
-}
-
-# Simulates test-unit.
-# @param xmp      [String] expected pattern of inspect.
-# @param expr     [Object] object to check.
-# @param message  [String] extra failure message.
-# @note  assertion is done in parent process, not in it.
-def xmp2assert_assert xmp, expr, c = caller(3)
-  c.reject! {|i| i.start_with? __FILE__ }
-  return assert_xmp_send xmp, expr.inspect, c
 end
 
 # Here we go.

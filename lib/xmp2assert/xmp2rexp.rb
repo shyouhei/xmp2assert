@@ -38,13 +38,11 @@ require_relative 'namespace'
 # To  reroute  the problem,  here  we  convert a  XMP  comment  into a  regular
 # expression.  The  idea behind this  is the  diff process hook  implemented in
 # https://github.com/ruby/chkbuild
-module XMP2Assert::XMP2Rexp
-  module_function
-
+class XMP2Assert::XMP2Rexp
   # Generates a regular expression that roughly matches the input.
   # @param xmp [String] example.
   # @return    [Regexp] converted regular expression.
-  def xmp2rexp xmp
+  def self.xmp2rexp xmp
     # :NOTE: we are  editing regular expressions using  regular expressions. In
     # order  to hack  this method  you must  be a  seasoned regular  expression
     # craftsperson who can count backslashes at ease.

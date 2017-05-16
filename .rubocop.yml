@@ -35,6 +35,10 @@ Lint/AmbiguousBlockAssociation:
 Lint/EmptyWhen:
   Enabled: false
 
+Lint/HandleExceptions:
+  # I KNOW WHAT I DO. Please stop annoying me.
+  Enabled: false
+
 Metrics/ParameterLists:
   Enabled: false
 
