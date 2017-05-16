@@ -56,8 +56,8 @@ module XMP2Assert::Assertions
       XMP2Assert::Spawn.new f, **opts do |_, i, o, e, r, t|
         i.write stdin_data
         i.close
-        out = Thread.new { o.read }
-        err = Thread.new { e.read }
+        out = Thread.new { o.read.force_encoding(qscript.__ENCODING__) }
+        err = Thread.new { e.read.force_encoding(qscript.__ENCODING__) }
         while n = t.gets do
           x = t.read n.to_i
           expected, actual, bt = *Marshal.load(x)
