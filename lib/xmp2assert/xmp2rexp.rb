@@ -50,6 +50,17 @@ class XMP2Assert::XMP2Rexp
     src = Regexp.escape xmp.strip
     src.gsub!(/([^\\])(\\n|\\ )+/, '\\1\s+')
     src.gsub!(/(#<[\w:]+?:)0x[0-9a-f]+/, '\\10x[0-9a-f]+')
+    src.gsub!(/\\u\\{([0-9a-f]{1,4})\\}/) {
+      str = $1
+      len = 4 - str.length
+      pad = '0' * len
+      next sprintf '\\u(?:%s%s|\\{%s\\})', pad, str.upcase, str
+    }
+    src.gsub!(/\\u([0-9A-F]{4})/) {
+      str = $1
+      hex = str.each_char.drop_while {|i| i == '0' }.join # :FIXME: slow?
+      next sprintf '\\u(?:%s|\\{%s\\})', str, hex.downcase
+    }
     src.gsub!(/\\\.rb:\d+/, '\\.rb:\d+')
 
     case nln when 0, 1 then

@@ -40,6 +40,21 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
     "\\n #1"  => ["foo\n",   /\Afoo\n?\z/],
     "\\n #2"  => ["foo\n\n", /\Afoo\n{2}\z/],
     "\\n #3"  => ['foo\n',   /\Afoo\\n\n?\z/],
+    "dump #0" => [
+      '"\\u{6b63}"', /\A"\\u(?:6B63|\{6b63\})"\n?\z/
+    ],
+    "dump #1" => [
+      '"\\u6B63"', /\A"\\u(?:6B63|\{6b63\})"\n?\z/
+    ],
+    "dump #2" => [
+      '"\\u0130"', /\A"\\u(?:0130|\{130\})"\n?\z/
+    ],
+    "dump #3" => [
+      '"\\u{130}"', /\A"\\u(?:0130|\{130\})"\n?\z/
+    ],
+    "dump #4" => [
+      '"\u{1f496}"', /\A"\\u\{1f496\}"\n?\z/
+    ],
     "complex" => [ <<'EOF', /\A#{<<'EOF'.chomp.gsub(/(\n|\s)+/, '\s+')}\n?\z/],
 #<PP:0x007fe02908fe88
  @buffer=[],
@@ -91,7 +106,7 @@ EOF
 
   test "escape" do |(expr, expected)|
     actual = XMP2Assert::XMP2Rexp.xmp2rexp expr
-    assert_equal actual, expected
+    assert_equal expected, actual
     assert_match actual, expr
   end
 end
