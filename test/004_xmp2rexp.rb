@@ -55,6 +55,7 @@ class TC004_XMP2Rexp < Test::Unit::TestCase
     "dump #4" => [
       '"\u{1f496}"', /\A"\\u\{1f496\}"\n?\z/
     ],
+    "..."     => [ '#<PP:0x...', /\A\#<PP:0x.+?\n?\z/],
     "complex" => [ <<'EOF', /\A#{<<'EOF'.chomp.gsub(/(\n|\s)+/, '\s+')}\n?\z/],
 #<PP:0x007fe02908fe88
  @buffer=[],

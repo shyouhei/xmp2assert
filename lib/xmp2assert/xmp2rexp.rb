@@ -62,6 +62,7 @@ class XMP2Assert::XMP2Rexp
       next sprintf '\\u(?:%s|\\{%s\\})', str, hex.downcase
     }
     src.gsub!(/\\\.rb:\d+/, '\\.rb:\d+')
+    src.gsub!(/(\\\.){3}/, '.+?')
 
     case nln when 0, 1 then
       return Regexp.new "\\A#{src}\\n?\\z"
