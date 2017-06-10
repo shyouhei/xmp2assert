@@ -24,4 +24,4 @@
 # SOFTWARE.
 ;
 
-XMP2Assert::VERSION = 13
+XMP2Assert::VERSION = 14
