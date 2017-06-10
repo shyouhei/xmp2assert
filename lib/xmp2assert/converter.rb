@@ -83,11 +83,12 @@ class XMP2Assert::Converter
   private_constant :Namespace
 
   def gen_tap tok
-    xmp = tok.to_s.chomp.dump
     case tok.to_sym
     when :'~>' then
+      xmp = "#<#{tok.to_s.chomp}>".dump
       return sprintf " rescue (xmp2assert_assert(%s, $!) and raise)", xmp
     when :'=>' then
+      xmp = tok.to_s.chomp.dump
       nam = gensym xmp
       return sprintf ".tap {|%s| xmp2assert_assert(%s, %s) }", nam, xmp, nam
     end
@@ -368,7 +369,7 @@ class XMP2Assert::Converter
         buf[sym] = tok.to_s << buf[sym]
         tok.yylex  = :comment
         tok.yylval = "#\n"
-      when :sp, :nl then
+      when :sp, :nl, :comment then
         next
       else
         break

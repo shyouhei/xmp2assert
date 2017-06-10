@@ -24,7 +24,7 @@
 # SOFTWARE.
 
 def foo
-  raise NameError, "ERR!!" # ~> #<NameError: ERR!!>
+  raise NameError, "ERR!!" # ~> NameError: ERR!!
 end
 
 foo

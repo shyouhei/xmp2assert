@@ -59,8 +59,9 @@ rescue Exception => e
   b = e.backtrace
   b.reject! {|i| i.start_with? __FILE__ }
   e.set_backtrace b
-  expected = <%= exception.dump %> #=
-  xmp2assert_assert expected, e, e.backtrace
+  expected = <%= exception.dump %>.lines #=
+  xmp2assert_assert expected[0], e.class, e.backtrace
+  xmp2assert_assert expected[1].chomp.inspect, e.message, e.backtrace
 end
 % else
 eval src, saved_binding, file, line
